@@ -1,0 +1,251 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Hello World App
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths
+basePath: /
+#
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /hello:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hello_world
+    get:
+      description: Returns 'Hello' to the caller
+      # used as the method name of the controller
+      operationId: hello
+      parameters:
+        - name: name
+          in: query
+          description: The name of the person to whom to say hello
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/HelloWorldResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+  /auth/login:
+    x-swagger-router-controller: auth/login
+    get:
+      tags:
+        - auth
+      summary: 사용자 인증을 한다.
+      description: ""
+      operationId: login
+      responses:
+        "200":
+          description: UserInfo
+          schema:
+            type: object
+            items:
+              $ref: "#/definitions/UserInfo"
+  /auth/loginCheck:
+    x-swagger-router-controller: auth/login
+    get:
+      tags:
+        - auth
+      summary: 로그인 상태를 확인한다.
+      description: ""
+      operationId: loginCheck
+      responses:
+        "200":
+          description: UserInfo
+          schema:
+            type: object
+            items:
+              $ref: "#/definitions/UserInfo"
+  /auth/logout:
+    x-swagger-router-controller: auth/login
+    post:
+      tags:
+        - auth
+      summary: 로그 아웃 한다.
+      description: ""
+      operationId: logout
+      responses:
+        "200":
+          description: "처리 결과"
+          schema:
+            $ref: "#/definitions/response"
+  /management/schedule:
+    x-swagger-router-controller: schedule
+    get:
+      tags:
+        - schedule
+      summary: return Schedule list
+      description: ""
+      operationId: getList
+      responses:
+        "200":
+          description: Schedule list
+          schema:
+            type: object
+            properties:
+              Schedules:
+                type: object
+                items:
+                  $ref: "#/definitions/Schedule"
+    post:
+      tags:
+        - schedule
+      summary: add new schedule
+      description: ""
+      operationId: addItem
+      parameters:
+        - in: body
+          name: body
+          description: "새로운 스케쥴을 추가한다."
+          required: true
+          schema:
+            $ref: "#/definitions/Schedule"
+      responses:
+        200:
+          description: "처리 결과"
+          schema:
+            $ref: "#/definitions/response"
+        500:
+          description: "오류 결과"
+          schema:
+            $ref: "#/definitions/response"
+    delete:
+      tags:
+        - schedule
+      summary: remove schedule
+      description: ""
+      operationId: deleteItem
+      parameters:
+        - name: name
+          in: query
+          description: 스케쥴의 고유 이름
+          required: true
+          type: string
+      responses:
+        200:
+          description: "처리 결과"
+          schema:
+            $ref: "#/definitions/response"
+        500:
+          description: "오류 결과"
+          schema:
+            $ref: "#/definitions/response"
+    patch:
+      tags:
+        - schedule
+      summary: control the operation of schedule
+      description: start/stop/restart
+      operationId: operateItem
+      parameters:
+        - in: body
+          name: body
+          description: program body
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Schedule Name
+              command:
+                type: string
+                example: start/stop/restart
+      responses:
+        200:
+          description: "처리 결과"
+          schema:
+            $ref: "#/definitions/response"
+        500:
+          description: "오류 결과"
+          schema:
+            $ref: "#/definitions/response"
+    put:
+      tags:
+        - schedule
+      summary: update schedule
+      description: ""
+      operationId: updateItem
+      parameters:
+        - in: body
+          name: body
+          description: 스케쥴을 변경한다.
+          required: true
+          schema:
+            $ref: "#/definitions/Schedule"
+      responses:
+        200:
+          description: "처리 결과"
+          schema:
+            $ref: "#/definitions/response"
+        500:
+          description: "오류 결과"
+          schema:
+            $ref: "#/definitions/response"
+
+# complex objects have schema definitions
+definitions:
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  Schedule:
+    type: object
+    required:
+      - name
+      - cron
+      - workjs
+    properties:
+      name:
+        type: string
+        description: Schedule Name
+        example: "scheduelName"
+      cron:
+        type: string
+        description: Schedule Cron
+        example: "* * * * *"
+      workjs:
+        type: string
+        description: Schedule workjs
+        example: "abc/abc/abc.js"
+  response:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        description: 처리 성공 여부 ex) OK, ERROR
+      message:
+        type: string
+        description: 오류 사유
+  UserInfo:
+    type: object
+    properties:
+      result:
+        type: object
