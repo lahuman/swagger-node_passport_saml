@@ -5,9 +5,9 @@ require("dotenv").config();
 
 const SwaggerExpress = require("swagger-express-mw");
 const SwaggerUi = require("swagger-tools/middleware/swagger-ui");
-const app = require("express")();
+const express = require("express");
+const app = express();
 const helmet = require("helmet");
-const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const passport = require("passport");
 require("./lib/passport").init(passport);
@@ -36,7 +36,8 @@ app.set("trust proxy", 1); // trust first proxy
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 SwaggerExpress.create(config, function (err, swaggerExpress) {
   if (err) {

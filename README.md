@@ -10,6 +10,22 @@ swagger 설치
 $> npm install -g swagger
 ```
 
+SAML 연동을 위한 설정을 **lib/passport.js** 에 설정합니다.
+
+```
+const config = {
+  strategy: "saml",
+  saml: {
+    path: "/login/callback",
+    entryPoint:
+      "https://ssourl/auth/realms/lahuman/protocol/saml/clients/saml-test",
+    issuer: "saml-test",
+    privateCert: fs.readFileSync("path/client-private-key.pem", "utf-8"),
+    signatureAlgorithm: "sha256",
+  },
+};
+```
+
 ## 설치된 기본 패키지
 
 - winston : log
